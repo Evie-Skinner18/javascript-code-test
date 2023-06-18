@@ -2,9 +2,19 @@ function BookSearchApiClient(format) {
   this.format = format;
 }
 
+// needs chunking down as it contravenes the SRP
+// vars to let or const
+// tightly coupled to an XMLHttpRequest. What if we want different types of requests. Contravenes teh OCP
+// if we want to test this we'll have to invoke the real api every time: want DI
+
+
+// IApiClient will allow for polymorphism
+// BookSearch implementation tbat obeys the contract
+// pass in
+
 BookSearchApiClient.prototype.getBooksByAuthor = function (authorName, limit) {
   var result = [];
-  var xhr = new XMLHttpRequest();
+  var xhr = new HttpRequest();
   xhr.open(
     "GET",
     "http://api.book-seller-example.com/by-author?q=" +
@@ -51,4 +61,4 @@ BookSearchApiClient.prototype.getBooksByAuthor = function (authorName, limit) {
   xhr.send();
 };
 
-module.exports = GetBookListApiClient;
+module.exports = BookSearchApiClient;
