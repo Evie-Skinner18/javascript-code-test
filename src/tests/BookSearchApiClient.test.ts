@@ -2,6 +2,7 @@ import {Book} from "../Books/Models/DTOs/Book";
 import {BookSearchApiClient} from "../BookSearchApiClient";
 import {Logger} from "tslog";
 import {IHttpClient} from "../IHttpClient";
+import {ResponseFormat} from "../ResponseFormat";
 
 const theMetamorphosis= new Book();
 theMetamorphosis.isbn = "1234";
@@ -18,6 +19,7 @@ aCountryDoctor.price = "£2";
 aCountryDoctor.quantity = "1";
 
 const mockHttpClient: IHttpClient = {
+    responseFormat: ResponseFormat.json,
     get: jest.fn().mockResolvedValue(theMetamorphosis),
     getBySearchQuery: jest.fn().mockResolvedValue([ theMetamorphosis,  aCountryDoctor]),
     post: jest.fn(),
