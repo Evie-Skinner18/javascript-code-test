@@ -14,7 +14,7 @@ function BookSearchApiClient(format) {
 
 BookSearchApiClient.prototype.getBooksByAuthor = function (authorName, limit) {
   var result = [];
-  var xhr = new HttpRequest();
+  var xhr = new XMLHttpRequest();
   xhr.open(
     "GET",
     "http://api.book-seller-example.com/by-author?q=" +
