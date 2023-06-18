@@ -1,64 +1,50 @@
-function BookSearchApiClient(format) {
-  this.format = format;
-}
+import {IHttpClient} from "./IHttpClient";
+import {Book} from "./Books/Models/DTOs/Book";
+import {Logger} from "tslog";
+import {BookSearchApiError} from "./BookSearchApiError";
+import {AxiosResponse} from "axios";
 
-// needs chunking down as it contravenes the SRP
-// vars to let or const
-// tightly coupled to an XMLHttpRequest. What if we want different types of requests. Contravenes teh OCP
-// if we want to test this we'll have to invoke the real api every time: want DI
+export class BookSearchApiClient{
+    private httpClient!: IHttpClient;
+    private logger!: Logger<BookSearchApiClient>;
 
-
-// IApiClient will allow for polymorphism
-// BookSearch implementation tbat obeys the contract
-// pass in
-
-BookSearchApiClient.prototype.getBooksByAuthor = function (authorName, limit) {
-  var result = [];
-  var xhr = new XMLHttpRequest();
-  xhr.open(
-    "GET",
-    "http://api.book-seller-example.com/by-author?q=" +
-      authorName +
-      "&limit=" +
-      limit +
-      "&format=" +
-      this.format
-  );
-
-  xhr.onload = function () {
-    if (xhr.status == 200) {
-      if (this.format == "json") {
-        var json = JSON.parse(xhr.responseText);
-
-        result = json.map(function (item) {
-          return {
-            title: item.book.title,
-            author: item.book.author,
-            isbn: item.book.isbn,
-            quantity: item.stock.quantity,
-            price: item.stock.price,
-          };
-        });
-      } else if (this.format == "xml") {
-        var xml = xhr.responseXML;
-
-        result = xml.documentElement.childNodes.map(function (item) {
-          return {
-            title: item.childNodes[0].childNodes[0].nodeValue,
-            author: item.childNodes[0].childNodes[1].nodeValue,
-            isbn: item.childNodes[0].childNodes[2].nodeValue,
-            quantity: item.childNodes[1].childNodes[0].nodeValue,
-            price: item.childNodes[1].childNodes[1].nodeValue,
-          };
-        });
-      }
-
-      return result;
-    } else {
-      alert("Request failed.  Returned status of " + xhr.status);
+    constructor(httpClient: IHttpClient, logger: Logger<any>) {
+        this.httpClient = httpClient;
+        this.logger = logger;
     }
-  };
-  xhr.send();
-};
 
-module.exports = BookSearchApiClient;
+    public async getBooksByAuthor(searchQuery: string): Promise<Book[]>{
+        let booksByAuthor: Book[] = [ ];
+        if (this.searchQueryIsValid(searchQuery)){
+            try {
+                const axiosResponse = await this.httpClient
+                    .getBySearchQuery(`/${searchQuery}`) as AxiosResponse<Book[]>;
+
+                this.logger.info(this.handleResponse(axiosResponse.status, axiosResponse.statusText));
+            } catch (e) {
+                this.logger.error(`Error getting books by author: ${(e as BookSearchApiError).message}`);
+            }
+        } else {
+            this.logger.error(`Invalid search query for getBooksByAuthor() - ${searchQuery}`);
+        }
+
+        return booksByAuthor;
+    }
+
+    public searchQueryIsValid(searchQuery: string): boolean{
+        return searchQuery.includes("by-author") &&
+            searchQuery.includes("limit") &&
+            searchQuery.includes("format");
+    }
+
+    public handleResponse(responseCode: number, responseCodeText?: string): string{
+        let message: string = "";
+
+        if (responseCode != 200){
+            message = `Error getting books by author: response status was
+                ${responseCode} ${responseCodeText}`;
+        }
+
+        return message;
+    }
+}
