@@ -1,7 +1,7 @@
 import {Book} from "../Books/Models/DTOs/Book";
 import {BookSearchApiClient} from "../BookSearchApiClient";
 import {Logger} from "tslog";
-import {IHttpClient} from "../IHttpClient";
+import {IHttpClient} from "../RestHttpClient";
 import {ResponseFormat} from "../ResponseFormat";
 
 const theMetamorphosis= new Book();
