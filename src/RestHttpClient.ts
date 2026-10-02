@@ -2,7 +2,8 @@ import { AxiosInstance } from "axios";
 import {ResponseFormat} from "./ResponseFormat";
 import { Logger } from "tslog";
 
-// todo: add support for fetch() without changing this class
+// todo: I added support for fetch() by changing this class which was naughty!
+// correct my mistake
 export class RestHttpClient {
     private baseUrl: string;
     private axios: AxiosInstance;
